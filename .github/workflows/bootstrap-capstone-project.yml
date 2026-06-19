@@ -27,9 +27,12 @@ jobs:
 
           # --- make sure the labels exist (ignore "already exists") ---
           ensure_label() { gh label create "$1" --color "$2" --description "$3" 2>/dev/null || true; }
-          ensure_label capstone 0E8A16 "Capstone 3 work item"
-          ensure_label bug      D73A4A "A bug to find and fix"
-          ensure_label required 5319E7 "Required for the capstone"
+          ensure_label capstone  0E8A16 "Capstone 3 work item"
+          ensure_label bug       D73A4A "A bug to find and fix"
+          ensure_label required  5319E7 "Required for the capstone"
+          ensure_label "not a bug" 0075CA "Not a bug"
+          ensure_label optional  E4E669 "Optional work item"
+          
 
           # --- create one issue per markdown file in .github/capstone-issues/ ---
           # idempotency: skip any issue whose title already exists
