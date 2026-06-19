@@ -25,13 +25,6 @@ jobs:
         run: |
           set -euo pipefail
 
-          # --- idempotency: do nothing if the capstone issues already exist ---
-          count=$(gh issue list --state all --label capstone --json number --jq 'length' 100>/dev/null || echo 0)
-          if [ "${count:-0}" -gt 0 ]; then
-            echo "Capstone issues already exist (${count}); nothing to do."
-            exit 0
-          fi
-
           # --- make sure the labels exist (ignore "already exists") ---
           ensure_label() { gh label create "$1" --color "$2" --description "$3" 2>/dev/null || true; }
           ensure_label capstone 0E8A16 "Capstone 3 work item"
@@ -39,12 +32,20 @@ jobs:
           ensure_label required 5319E7 "Required for the capstone"
 
           # --- create one issue per markdown file in .github/capstone-issues/ ---
+          # idempotency: skip any issue whose title already exists
           shopt -s nullglob
           for f in .github/capstone-issues/*.md; do
             title=$(sed -n 's/^title:[[:space:]]*//p' "$f" | head -1 | sed 's/^"//; s/"$//')
             labels=$(sed -n 's/^labels:[[:space:]]*//p' "$f" | head -1)
             # body = everything after the closing '---' of the front matter
             awk 'b{print} /^---[[:space:]]*$/{n++; if(n==2){b=1}}' "$f" > /tmp/body.md
+
+            # skip if an issue with this exact title already exists
+            existing=$(gh issue list --state all --search "\"$title\" in:title" --json title --jq '.[].title' | grep -Fx "$title" || true)
+            if [ -n "$existing" ]; then
+              echo "Issue already exists, skipping: $title"
+              continue
+            fi
 
             label_args=(--label capstone)
             IFS=',' read -ra parts <<< "$labels"
