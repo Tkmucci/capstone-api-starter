@@ -72,15 +72,18 @@ public class CategoriesController
     {
         // insert the category and return it with status 201 Created
         categoryService.create(category);
-        return null;
+        return ResponseEntity.ok(category);
     }
 
     // add annotation to call this method for a PUT (update) action - the url path must include the categoryId
+    @PutMapping("/{id}")
     // add annotation to ensure that only an ADMIN can call this function
-    public Category updateCategory(@PathVariable int id, @RequestBody Category category)
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<Category> updateCategory(@PathVariable int id, @RequestBody Category category)
     {
         // update the category by id and return the updated category (200 OK)
-        return null;
+        categoryService.update(id, category);
+        return ResponseEntity.ok(category);
     }
 
 
