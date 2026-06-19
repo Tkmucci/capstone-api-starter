@@ -26,7 +26,7 @@ jobs:
           set -euo pipefail
 
           # --- idempotency: do nothing if the capstone issues already exist ---
-          count=$(gh issue list --state all --label capstone --json number --jq 'length' 2>/dev/null || echo 0)
+          count=$(gh issue list --state all --label capstone --json number --jq 'length' 100>/dev/null || echo 0)
           if [ "${count:-0}" -gt 0 ]; then
             echo "Capstone issues already exist (${count}); nothing to do."
             exit 0
