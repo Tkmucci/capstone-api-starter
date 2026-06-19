@@ -2,7 +2,6 @@ package org.yearup.security.jwt;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.slf4j.Logger;
@@ -16,7 +15,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Component;
 
-import java.security.Key;
+import javax.crypto.SecretKey;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
@@ -33,7 +32,7 @@ public class TokenProvider implements InitializingBean
     private final String secret;
     private final long tokenTimeout;
 
-    private Key key;
+    private SecretKey key;
 
 
     public TokenProvider(
@@ -61,20 +60,20 @@ public class TokenProvider implements InitializingBean
         Date expirationDate = new Date(now + this.tokenTimeout);
 
         return Jwts.builder()
-                .setSubject(authentication.getName())
+                .subject(authentication.getName())
                 .claim(AUTHORITIES_KEY, authorities)
-                .signWith(key, SignatureAlgorithm.HS512)
-                .setExpiration(expirationDate)
+                .signWith(key, Jwts.SIG.HS512)
+                .expiration(expirationDate)
                 .compact();
     }
 
     public Authentication getAuthentication(String token)
     {
-        Claims claims = Jwts.parserBuilder()
-                .setSigningKey(key)
+        Claims claims = Jwts.parser()
+                .verifyWith(key)
                 .build()
-                .parseClaimsJws(token)
-                .getBody();
+                .parseSignedClaims(token)
+                .getPayload();
 
         Collection<? extends GrantedAuthority> authorities =
                 Arrays.stream(claims.get(AUTHORITIES_KEY).toString().split(","))
@@ -90,7 +89,7 @@ public class TokenProvider implements InitializingBean
     {
         try
         {
-            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(authToken);
+            Jwts.parser().verifyWith(key).build().parseSignedClaims(authToken);
             return true;
         }
         catch (Exception e)
