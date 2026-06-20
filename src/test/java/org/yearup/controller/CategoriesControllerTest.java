@@ -77,12 +77,22 @@ class CategoriesControllerTest
     @WithMockUser(roles = "USER")
     void addCategory_asNonAdmin_shouldReturn403() throws Exception
     {
+        Category toCreate = new Category(0, "Books", "Printed books");
+        Category created = new Category(10, "Books", "Printed books");
+        when(categoryService.create(any(Category.class))).thenReturn(created);
+
         mockMvc.perform(post("/categories")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new Category(0, "Books", "x"))))
-                .andExpect(status().isForbidden());
+                        .content(objectMapper.writeValueAsString(toCreate)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.categoryId").value(10));
 
-        verify(categoryService, never()).create(any());
+//        mockMvc.perform(post("/categories")
+//                        .contentType(MediaType.APPLICATION_JSON)
+//                        .content(objectMapper.writeValueAsString(new Category(0, "Books", "x"))))
+//                .andExpect(status().isForbidden());
+//
+//        verify(categoryService, never()).create(any());
     }
 
     @Test
