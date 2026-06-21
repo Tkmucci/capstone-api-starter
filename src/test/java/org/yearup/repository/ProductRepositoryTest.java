@@ -3,30 +3,44 @@ package org.yearup.repository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
-import org.springframework.test.context.jdbc.Sql;
 import org.yearup.models.Product;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
-@Sql(scripts = "classpath:test-insert-data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 class ProductRepositoryTest
 {
     @Autowired
     private ProductRepository productRepository;
 
     @Test
-    public void getById_shouldReturn_theCorrectProduct()
+    void findByCategoryId_shouldReturnMatchingProducts()
     {
-        // arrange
-        int productId = 1;
+        productRepository.save(new Product(0, "Laptop", 800.0, 1, "d", "Computers", 10, true, "i.png"));
+        productRepository.save(new Product(0, "Shirt", 25.0, 2, "d", "Apparel", 50, false, "i.png"));
 
-        // act
-        Product actual = productRepository.findById(productId).orElse(null);
+        List<Product> inCat1 = productRepository.findByCategoryId(1);
 
-        // assert
-        assertNotNull(actual, "Because product 1 should exist in the test database.");
-        assertEquals(499.99, actual.getPrice(), 0.001, "Because I tried to get product 1 from the database.");
+        assertEquals(1, inCat1.size());
+        assertEquals("Laptop", inCat1.get(0).getName());
+    }
+
+    @Test
+    void save_shouldGenerateId()
+    {
+        Product saved = productRepository.save(
+                new Product(0, "Test", 10.0, 1, "d", "sub", 5, false, "i.png"));
+
+        assertTrue(saved.getProductId() > 0);
+    }
+
+    @Test
+    void findByCategoryId_shouldReturnEmpty_whenNoMatch()
+    {
+        List<Product> result = productRepository.findByCategoryId(999);
+
+        assertTrue(result.isEmpty());
     }
 }
