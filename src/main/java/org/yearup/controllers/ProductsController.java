@@ -27,7 +27,8 @@ public class ProductsController
     public List<Product> search(@RequestParam(name="cat", required = false) Integer categoryId,
                                 @RequestParam(name="minPrice", required = false) Double minPrice,
                                 @RequestParam(name="maxPrice", required = false) Double maxPrice,
-                                @RequestParam(name="subCategory", required = false) String subCategory)
+                                @RequestParam(name="subCategory", required = false) String subCategory,
+                                @RequestParam(name="isFeatured",required = false) boolean isFeatured)
     {
         return productService.search(categoryId, minPrice, maxPrice, subCategory);
     }
