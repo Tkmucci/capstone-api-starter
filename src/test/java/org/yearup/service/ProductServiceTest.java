@@ -113,7 +113,7 @@ class ProductServiceTest
         Product cheap = new Product(2, "Mouse", 20.0, 1, "d", "Computers", 5, true, "m.png");
         when(productRepository.findByCategoryId(1)).thenReturn(List.of(laptop, cheap));
 
-        List<Product> result = productService.search(1, 0.0, 100.0, null);
+        List<Product> result = productService.search(1, 0.0, 100.0, null, true);
 
         // only the cheap featured item is in range
         assertEquals(1, result.size());
@@ -127,7 +127,7 @@ class ProductServiceTest
         Product notFeatured = new Product(3, "Cable", 5.0, 1, "d", "Computers", 5, false, "c.png");
         when(productRepository.findByCategoryId(1)).thenReturn(List.of(laptop, notFeatured));
 
-        List<Product> result = productService.search(1, null, null, null);
+        List<Product> result = productService.search(1, null, null, null, true);
 
         assertEquals(1, result.size());
         assertTrue(result.get(0).isFeatured());

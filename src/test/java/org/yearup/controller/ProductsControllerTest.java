@@ -33,7 +33,7 @@ class ProductsControllerTest
     @Test
     void search_shouldReturn200AndProducts() throws Exception
     {
-        when(productService.search(any(), any(), any(), any()))
+        when(productService.search(any(), any(), any(), any(), false))
                 .thenReturn(List.of(new Product(1, "Laptop", 800.0, 1, "d", "Computers", 10, true, "i.png")));
 
         mockMvc.perform(get("/products"))

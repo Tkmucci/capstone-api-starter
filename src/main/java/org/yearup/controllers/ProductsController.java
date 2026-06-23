@@ -28,9 +28,9 @@ public class ProductsController
                                 @RequestParam(name="minPrice", required = false) Double minPrice,
                                 @RequestParam(name="maxPrice", required = false) Double maxPrice,
                                 @RequestParam(name="subCategory", required = false) String subCategory,
-                                @RequestParam(name="isFeatured",required = false) boolean isFeatured)
+                                @RequestParam(name="isFeatured",required = false) Boolean isFeatured)
     {
-        return productService.search(categoryId, minPrice, maxPrice, subCategory);
+        return productService.search(categoryId, minPrice, maxPrice, subCategory,isFeatured);
     }
 
     @GetMapping("{id}")
