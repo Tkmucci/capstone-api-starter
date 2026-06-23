@@ -38,7 +38,7 @@ public class CategoryService {
         existing.setCategoryId(categoryId);
         existing.setDescription(category.getDescription());
         existing.setName(category.getName());
-        return categoryRepository.save(category);
+        return categoryRepository.save(existing);
     }
 
     public void delete(int categoryId) {

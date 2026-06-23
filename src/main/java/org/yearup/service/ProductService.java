@@ -1,6 +1,8 @@
 package org.yearup.service;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 import org.yearup.models.Product;
 import org.yearup.repository.ProductRepository;
 
@@ -41,7 +43,10 @@ public class ProductService {
     }
 
     public Product update(int productId, Product product) {
-        Product existing = productRepository.findById(productId).orElseThrow();
+
+        Product existing = productRepository.findById(productId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found"));
+
         existing.setName(product.getName());
         existing.setPrice(product.getPrice());
         existing.setCategoryId(product.getCategoryId());
@@ -49,6 +54,7 @@ public class ProductService {
         existing.setSubCategory(product.getSubCategory());
         existing.setFeatured(product.isFeatured());
         existing.setImageUrl(product.getImageUrl());
+        existing.setStock(product.getStock());
         return productRepository.save(existing);
     }
 
