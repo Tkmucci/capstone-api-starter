@@ -63,14 +63,14 @@ public class ShoppingCartController
     @PutMapping("/products/{id}")
     // https://localhost:8080/cart/products/15  (15 is the productId to be updated)
     // the BODY should be a ShoppingCartItem - quantity is the only value that will be updated; return the cart (200 OK)
-    public ResponseEntity<ShoppingCartItem> updateCart(@PathVariable int id,
+    public ResponseEntity<ShoppingCart> updateCart(@PathVariable int id,
                                                        @RequestBody ShoppingCartItem item,
                                                        Principal principal)
     {
 
         User user = userService.getByUserName(principal.getName());
 
-        ShoppingCartItem cartItem = shoppingCartService.updateCartItem(user.getId(), id, item.getQuantity());
+        ShoppingCart cartItem = shoppingCartService.updateCartItem(user.getId(), id, item.getQuantity());
 
         return ResponseEntity.ok(cartItem);
 
@@ -79,5 +79,14 @@ public class ShoppingCartController
 
     // add a DELETE method to clear all products from the current users cart
     // https://localhost:8080/cart  - return the (now empty) cart so the front end can refresh it (200 OK)
+
+    @DeleteMapping
+    public ResponseEntity<ShoppingCart> clearCart( Principal principal)
+    {
+        User user = userService.getByUserName(principal.getName());
+        ShoppingCart cartItems = shoppingCartService.clearCart(user.getId());
+
+        return ResponseEntity.ok(cartItems);
+    }
 
 }
