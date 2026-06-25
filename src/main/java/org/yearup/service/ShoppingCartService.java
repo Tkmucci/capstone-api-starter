@@ -1,6 +1,5 @@
 package org.yearup.service;
 
-import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import org.yearup.models.CartItem;
 import org.yearup.models.ShoppingCart;
@@ -66,6 +65,9 @@ public class ShoppingCartService
 
         CartItem cartItem = shoppingCartRepository.findByUserIdAndProductId(userId, productId);
 
+        if(cartItem == null){
+            throw new RuntimeException("Cart item not found");
+        }
         cartItem.setQuantity(quantity);
         shoppingCartRepository.save(cartItem);
 

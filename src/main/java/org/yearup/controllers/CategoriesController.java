@@ -1,5 +1,6 @@
 package org.yearup.controllers;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -26,6 +27,7 @@ public class CategoriesController
     private final ProductService productService;
 
     // create an Autowired constructor to inject the categoryService and productService
+    @Autowired
     public CategoriesController(CategoryService categoryService, ProductService productService){
 
         this.productService = productService;
