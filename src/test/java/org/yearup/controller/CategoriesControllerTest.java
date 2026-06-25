@@ -49,7 +49,7 @@ class CategoriesControllerTest
     @Test
     void getById_shouldReturn200AndCategory() throws Exception
     {
-        when(categoryService.getById(1))
+        when(categoryService.getByCategoryId(1))
                 .thenReturn(new Category(1, "Electronics", "Gadgets"));
 
         mockMvc.perform(get("/categories/1"))

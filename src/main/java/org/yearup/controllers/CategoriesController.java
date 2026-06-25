@@ -36,33 +36,63 @@ public class CategoriesController
     }
 
     // add the appropriate annotation for a get action
-    @GetMapping
-    public ResponseEntity<List<Category>> getAllCategories()
+    @GetMapping("")
+    @PreAuthorize("permitAll()")
+    public ResponseEntity<?> getAllCategories()
     {
-        // find and return all categories
-        List<Category> categories = categoryService.getAllCategories();
 
-        return ResponseEntity.ok(categories);
+        try {
+
+            // find and return all categories
+            List<Category> categories = categoryService.getAllCategories();
+
+            return ResponseEntity.ok(categories);
+
+        } catch (RuntimeException e) {
+
+            return ResponseEntity.status(500).body("Could not find the Category");
+        }
     }
 
     // add the appropriate annotation for a get action
-    @GetMapping("/{id}")
-    public ResponseEntity<Category> getById(@PathVariable int id)
+    @GetMapping("/{categoryId}")
+    @PreAuthorize("permitAll()")
+    public ResponseEntity<?> getByCategoryId(@PathVariable int categoryId)
     {
-        // get the category by id
-        Category category = categoryService.getById(id);
+        try {
+            // get the category by id
+            Category category = categoryService.getByCategoryId(categoryId);
 
-        return ResponseEntity.ok(category);
+            return ResponseEntity.ok(category);
+
+        } catch (RuntimeException e) {
+
+            return ResponseEntity.status(404).body("Could not find the Category");
+        }
     }
 
     // the url to return all products in category 1 would look like this
     // https://localhost:8080/categories/1/products
     @GetMapping("{categoryId}/products")
-    public ResponseEntity<List<Product>> getProductsById(@PathVariable int categoryId)
+    @PreAuthorize("permitAll()")
+    public ResponseEntity<?> getProductsByCategoryId(@PathVariable int categoryId)
     {
-        // get a list of product by categoryId
-        List<Product> products = productService.listByCategoryId(categoryId);
-        return ResponseEntity.ok(products);
+
+        try {
+
+            // get a list of product by categoryId
+            List<Product> products = productService.listByCategoryId(categoryId);
+
+            if (products.isEmpty()) {
+
+                return ResponseEntity.status(404).body("No products found for category ID: " + categoryId);
+            }
+            return ResponseEntity.ok(products);
+        }
+        catch (RuntimeException e) {
+
+            return ResponseEntity.status(500).body("Could not find the Products for category ID: " + categoryId );
+        }
     }
 
 
@@ -71,33 +101,55 @@ public class CategoriesController
 
     // add annotation to ensure that only an ADMIN can call this function
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    public ResponseEntity<Category> addCategory(@RequestBody Category category)
+    public ResponseEntity<?> addCategory(@RequestBody Category category)
     {
-        // insert the category and return it with status 201 Created
-        Category created = categoryService.create(category);
-        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+
+        try {
+            // insert the category and return it with status 201 Created
+            Category created = categoryService.create(category);
+            return ResponseEntity.status(HttpStatus.CREATED).body(created);
+        } catch (RuntimeException e) {
+            return  ResponseEntity.status(500).body("Could not create the Category");
+        }
     }
 
     // add annotation to call this method for a PUT (update) action - the url path must include the categoryId
     @PutMapping("/{id}")
     // add annotation to ensure that only an ADMIN can call this function
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    public ResponseEntity<Category> updateCategory(@PathVariable int id, @RequestBody Category category)
+    public ResponseEntity<?> updateCategory(@PathVariable int id, @RequestBody Category category)
     {
-        // update the category by id and return the updated category (200 OK)
-        categoryService.update(id, category);
-        return ResponseEntity.ok(category);
+        try {
+
+            // update the category by id and return the updated category (200 OK)
+            categoryService.update(id, category);
+            return ResponseEntity.ok(category);
+        }
+        catch (RuntimeException e) {
+
+            return ResponseEntity.status(404).body("category with ID: " + id + " not found");
+        }
     }
 
 
     // add annotation to call this method for a DELETE action - the url path must include the categoryId
     @DeleteMapping("/{id}")
+
     // add annotation to ensure that only an ADMIN can call this function
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    public ResponseEntity<Void> deleteCategory(@PathVariable int id)
+
+    public ResponseEntity<?> deleteCategory(@PathVariable int id)
     {
-        // delete the category by id and return status 204 No Content
-        categoryService.delete(id);
-        return ResponseEntity.noContent().build();
+        try {
+
+            // delete the category by id and return status 204 No Content
+            categoryService.delete(id);
+
+            return ResponseEntity.noContent().build();
+
+        } catch (RuntimeException e) {
+
+            return ResponseEntity.status(404).body("Could not delete the Category");
+        }
     }
 }

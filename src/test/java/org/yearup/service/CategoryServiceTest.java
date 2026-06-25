@@ -38,7 +38,7 @@ class CategoryServiceTest
     {
         when(categoryRepository.findById(1)).thenReturn(Optional.of(electronics));
 
-        Category actual = categoryService.getById(1);
+        Category actual = categoryService.getByCategoryId(1);
 
         assertEquals(1, actual.getCategoryId());
         assertEquals("Electronics", actual.getName());
@@ -49,7 +49,7 @@ class CategoryServiceTest
     {
         when(categoryRepository.findById(99)).thenReturn(Optional.empty());
 
-        assertThrows(ResponseStatusException.class, () -> categoryService.getById(99));
+        assertThrows(ResponseStatusException.class, () -> categoryService.getByCategoryId(99));
     }
 
     @Test

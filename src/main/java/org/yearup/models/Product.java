@@ -29,11 +29,11 @@ public class Product
     @Column(name = "stock")
     private int stock;
 
-    @Column(name = "featured")
-    private boolean isFeatured;
-
     @Column(name = "image_url")
     private String imageUrl;
+
+    @Column(name = "featured")
+    private boolean isFeatured;
 
     public Product()
     {

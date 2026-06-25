@@ -1,7 +1,16 @@
 package org.yearup.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
+@JsonPropertyOrder({
+
+        "product",
+        "quantity",
+        "discountPercent",
+        "lineTotal"
+
+})
 public class ShoppingCartItem
 {
     private Product product = null;

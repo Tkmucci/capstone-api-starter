@@ -1,8 +1,15 @@
 package org.yearup.models;
 
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
 import java.util.HashMap;
 import java.util.Map;
 
+
+@JsonPropertyOrder({
+        "items",
+        "total"
+})
 public class ShoppingCart
 {
     private Map<Integer, ShoppingCartItem> items = new HashMap<>();
