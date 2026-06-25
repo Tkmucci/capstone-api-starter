@@ -1,7 +1,6 @@
 package org.yearup.controllers;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.*;
 import org.yearup.models.ShoppingCart;
 import org.yearup.models.ShoppingCartItem;
