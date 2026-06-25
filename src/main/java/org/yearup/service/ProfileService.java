@@ -4,24 +4,40 @@ import org.springframework.stereotype.Service;
 import org.yearup.models.Profile;
 import org.yearup.repository.ProfileRepository;
 
-import java.util.List;
-
 @Service
-public class ProfileService
-{
+public class ProfileService {
     private final ProfileRepository profileRepository;
 
-    public ProfileService(ProfileRepository profileRepository)
-    {
+    public ProfileService(ProfileRepository profileRepository) {
         this.profileRepository = profileRepository;
     }
 
-    public Profile create(Profile profile)
-    {
+    public Profile create(Profile profile) {
         return profileRepository.save(profile);
     }
-    public Profile getProfileById(int userId)
-    {
+
+    public Profile getProfileById(int userId) {
         return profileRepository.findById(userId).orElse(null);
+    }
+
+    public Profile updateProfile(int userId, Profile profile) {
+        Profile existing = profileRepository.findById(userId).orElse(null);
+
+        if (existing == null) {
+
+            throw new RuntimeException("Profile not found for user ID: " + userId);
+
+        }
+
+        existing.setFirstName(profile.getFirstName());
+        existing.setLastName(profile.getLastName());
+        existing.setPhone(profile.getPhone());
+        existing.setEmail(profile.getEmail());
+        existing.setAddress(profile.getAddress());
+        existing.setCity(profile.getCity());
+        existing.setState(profile.getState());
+        existing.setZip(profile.getZip());
+
+        return profileRepository.save(existing);
     }
 }

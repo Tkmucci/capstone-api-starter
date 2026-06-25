@@ -8,10 +8,9 @@ import org.yearup.service.ProfileService;
 import org.yearup.service.UserService;
 
 import java.security.Principal;
-import java.util.List;
 
 @RestController
-@RequestMapping("profile")
+@RequestMapping("/profile")
 @CrossOrigin(origins = "*")
 public class ProfileController {
 
@@ -42,8 +41,17 @@ public class ProfileController {
     public ResponseEntity<?> updateProfile(Principal principal, @RequestBody Profile profile) {
 
 
+        User user = userService.getByUserName(principal.getName());
+        try{
 
-        return ResponseEntity.ok(profile);
+            Profile updatedProfile = profileService.updateProfile(user.getId(), profile);
+            return ResponseEntity.ok(updatedProfile);
+
+        }
+        catch (RuntimeException e){
+
+            return ResponseEntity.status(404).body("Could not find the profile");
+        }
     }
 
 
