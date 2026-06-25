@@ -45,7 +45,12 @@ public class ProductService {
     public Product update(int productId, Product product) {
 
         Product existing = productRepository.findById(productId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found"));
+                .orElse(null);
+
+        if (existing == null) {
+            
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found");
+        }
 
         existing.setName(product.getName());
         existing.setPrice(product.getPrice());

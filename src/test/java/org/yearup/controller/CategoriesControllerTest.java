@@ -89,7 +89,7 @@ class CategoriesControllerTest
 
 //        mockMvc.perform(post("/categories")
 //                        .contentType(MediaType.APPLICATION_JSON)
-//                        .content(objectMapper.writeValueAsString(new Category(0, "Books", "x"))))
+//                        .content(objectMapper.writeValueAsString(new Category(0, "Books", "Printed books"))))
 //                .andExpect(status().isForbidden());
 //
 //        verify(categoryService, never()).create(any());

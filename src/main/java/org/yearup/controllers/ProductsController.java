@@ -6,8 +6,11 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.yearup.models.Product;
+import org.yearup.models.User;
 import org.yearup.service.ProductService;
+import org.yearup.service.UserService;
 
+import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -16,6 +19,7 @@ import java.util.List;
 public class ProductsController
 {
     private final ProductService productService;
+    private UserService userService;
 
     public ProductsController(ProductService productService)
     {
@@ -55,12 +59,21 @@ public class ProductsController
 
     @PutMapping("{id}")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    public Product updateProduct(@PathVariable int id, @RequestBody Product product)
+    public ResponseEntity<?> updateProduct(@PathVariable int id, @RequestBody Product product)
     {
-        if (productService.getById(id) == null)
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        try {
 
-        return productService.update(id, product);
+            if (productService.getById(id) == null) {
+
+                return ResponseEntity.status(404).body("Product not found for ID: " + id);
+            }
+
+            Product updated = productService.update(id, product);
+            return ResponseEntity.ok(updated);
+
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(500).body("Could not update product");
+        }
     }
 
     @DeleteMapping("{id}")

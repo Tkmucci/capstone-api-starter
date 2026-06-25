@@ -1,6 +1,7 @@
 package org.yearup.controllers;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.yearup.models.Profile;
 import org.yearup.models.User;
@@ -14,8 +15,8 @@ import java.security.Principal;
 @CrossOrigin(origins = "*")
 public class ProfileController {
 
-    private ProfileService profileService;
-    private UserService userService;
+    private final ProfileService profileService;
+    private final UserService userService;
 
 
     public ProfileController(ProfileService profileService, UserService userService) {
@@ -25,6 +26,7 @@ public class ProfileController {
     }
 
     @GetMapping
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> getUsersProfile(Principal principal) {
 
         // get the currently logged in username

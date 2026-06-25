@@ -27,7 +27,6 @@ public class CategoriesController
     private final ProductService productService;
 
     // create an Autowired constructor to inject the categoryService and productService
-    @Autowired
     public CategoriesController(CategoryService categoryService, ProductService productService){
 
         this.productService = productService;
@@ -62,6 +61,10 @@ public class CategoriesController
         try {
             // get the category by id
             Category category = categoryService.getByCategoryId(categoryId);
+
+            if (category == null) {
+                return ResponseEntity.status(404).body("Category not found for ID: " + categoryId);
+            }
 
             return ResponseEntity.ok(category);
 
@@ -100,16 +103,18 @@ public class CategoriesController
     @PostMapping
 
     // add annotation to ensure that only an ADMIN can call this function
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<?> addCategory(@RequestBody Category category)
     {
 
         try {
             // insert the category and return it with status 201 Created
             Category created = categoryService.create(category);
-            return ResponseEntity.status(HttpStatus.CREATED).body(created);
+            return ResponseEntity.status(201).body(created);
         } catch (RuntimeException e) {
-            return  ResponseEntity.status(500).body("Could not create the Category");
+
+            return  ResponseEntity.badRequest().body("Could not create the Category");
+            //return  ResponseEntity.status(403).body("Could not create the Category");
         }
     }
 
