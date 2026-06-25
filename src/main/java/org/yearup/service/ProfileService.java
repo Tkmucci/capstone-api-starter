@@ -20,8 +20,8 @@ public class ProfileService
     {
         return profileRepository.save(profile);
     }
-    public List<Profile> getProfiles()
+    public Profile getProfileById(int userId)
     {
-        return profileRepository.findAll();
+        return profileRepository.findById(userId).orElse(null);
     }
 }
