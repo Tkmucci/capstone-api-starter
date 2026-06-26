@@ -135,6 +135,11 @@ public class CategoriesController
     {
         try {
 
+            if(!categoryService.existByID(id)){
+
+                return ResponseEntity.status(404).body("Category with ID: " + id + " not found");
+            }
+
             // update the category by id and return the updated category (200 OK)
             categoryService.update(id, category);
 
@@ -142,7 +147,7 @@ public class CategoriesController
         }
         catch (RuntimeException e) {
 
-            return ResponseEntity.status(404).body("category with ID: " + id + " not found");
+            return ResponseEntity.badRequest().body("category with ID: " + id + " not found");
         }
     }
 

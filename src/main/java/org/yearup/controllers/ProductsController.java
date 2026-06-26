@@ -15,7 +15,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("products")
-@CrossOrigin
+@CrossOrigin(origins = "*")
 public class ProductsController
 {
     private final ProductService productService;
@@ -50,24 +50,41 @@ public class ProductsController
         }
     }
 
-    @GetMapping("{id}")
+    @GetMapping("{productId}")
     @PreAuthorize("permitAll()")
-    public Product getById(@PathVariable int id)
+    public ResponseEntity<?> getById(@PathVariable int productId)
     {
-        Product product = productService.getById(id);
 
-        if (product == null)
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        try {
+            Product product = productService.getById(productId);
 
-        return product;
+            if (product == null) {
+
+                return ResponseEntity.status(404).body("Product not found with ID: " + productId);
+
+            }
+
+            return ResponseEntity.ok(product);
+        }
+        catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body("Could not find the product");
+        }
     }
 
     @PostMapping()
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    public ResponseEntity<Product> addProduct(@RequestBody Product product)
+    public ResponseEntity<?> addProduct(@RequestBody Product product)
     {
-        Product saved = productService.create(product);
-        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
+        try {
+
+            Product saved = productService.create(product);
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(saved);
+
+        } catch (RuntimeException e) {
+
+            return ResponseEntity.badRequest().body("There was an error processing request");
+        }
     }
 
     @PutMapping("{id}")
@@ -85,7 +102,8 @@ public class ProductsController
             return ResponseEntity.ok(updated);
 
         } catch (RuntimeException e) {
-            return ResponseEntity.status(500).body("Could not update product");
+
+            return ResponseEntity.badRequest().body("Could not update product");
         }
     }
 
@@ -105,7 +123,7 @@ public class ProductsController
             return ResponseEntity.noContent().build();
         }
         catch (ResponseStatusException e) {
-            return ResponseEntity.status(404).body("Product not found for ID: " + id);
+            return ResponseEntity.badRequest().body("Product not found for ID: " + id);
         }
 
     }

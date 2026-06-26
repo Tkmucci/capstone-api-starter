@@ -29,15 +29,21 @@ public class ProfileController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> getUsersProfile(Principal principal) {
 
-        // get the currently logged in username
-        String userName = principal.getName();
-        // find database user by username
-        User user = userService.getByUserName(userName);
-        int userId = user.getId();
+        try {
+            // get the currently logged in username
+            String userName = principal.getName();
+            // find database user by username
+            User user = userService.getByUserName(userName);
+            int userId = user.getId();
 
-        Profile profiles = profileService.getProfileById(userId);
+            Profile profiles = profileService.getProfileById(userId);
 
-        return ResponseEntity.ok(profiles);
+            return ResponseEntity.ok(profiles);
+        }
+        catch (RuntimeException e){
+
+            return ResponseEntity.badRequest().body("There was an error getting the profile");
+        }
     }
     @PutMapping
     @PreAuthorize("isAuthenticated()")
@@ -53,7 +59,7 @@ public class ProfileController {
         }
         catch (RuntimeException e){
 
-            return ResponseEntity.status(404).body("Could not find the profile");
+            return ResponseEntity.badRequest().body("There was an error updating the profile");
         }
     }
 

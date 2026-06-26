@@ -45,11 +45,16 @@ public class ShoppingCartController {
             // use the shoppingCartService to get all items in the cart and return the cart
             ShoppingCart cart = shoppingCartService.getByUserId(userId);
 
+            if(cart.getItems().isEmpty()){
+
+                return ResponseEntity.status(200).body("Cart is empty");
+            }
+
             return ResponseEntity.status(200).body(cart);
 
         }catch (RuntimeException e){
 
-            return ResponseEntity.status(500).body("Could not find cart items");
+            return ResponseEntity.badRequest().body("Could not find cart items");
         }
     }
 
@@ -71,7 +76,7 @@ public class ShoppingCartController {
             return ResponseEntity.status(201).body(cart);
         }
         catch (RuntimeException e){
-            return ResponseEntity.status(404).body("Product not found");
+            return ResponseEntity.badRequest().body("Product not found");
         }
     }
 
@@ -97,7 +102,7 @@ public class ShoppingCartController {
 
             String message = "Product not found in cart";
 
-            return ResponseEntity.status(404).body(message);
+            return ResponseEntity.badRequest().body(message);
         }
     }
 
@@ -120,7 +125,7 @@ public class ShoppingCartController {
 
             String message = "Could not clear cart.";
 
-            return ResponseEntity.status(404).body(message);
+            return ResponseEntity.badRequest().body(message);
         }
     }
 }
