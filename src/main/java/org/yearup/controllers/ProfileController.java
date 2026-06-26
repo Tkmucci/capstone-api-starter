@@ -40,6 +40,7 @@ public class ProfileController {
         return ResponseEntity.ok(profiles);
     }
     @PutMapping
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> updateProfile(Principal principal, @RequestBody Profile profile) {
 
 

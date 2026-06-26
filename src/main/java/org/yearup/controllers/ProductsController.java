@@ -28,13 +28,26 @@ public class ProductsController
 
     @GetMapping("")
     @PreAuthorize("permitAll()")
-    public List<Product> search(@RequestParam(name="cat", required = false) Integer categoryId,
+    public ResponseEntity<?> search(@RequestParam(name="cat", required = false) Integer categoryId,
                                 @RequestParam(name="minPrice", required = false) Double minPrice,
                                 @RequestParam(name="maxPrice", required = false) Double maxPrice,
                                 @RequestParam(name="subCategory", required = false) String subCategory,
                                 @RequestParam(name="isFeatured",required = false) Boolean isFeatured)
     {
-        return productService.search(categoryId, minPrice, maxPrice, subCategory,isFeatured);
+        try {
+
+            List <Product> products = productService.search(categoryId, minPrice, maxPrice, subCategory, isFeatured);
+
+            if (products.isEmpty()) {
+
+                return ResponseEntity.badRequest().body("No products found");
+            }
+
+            return ResponseEntity.ok(products);
+
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body("There was an error getting the product");
+        }
     }
 
     @GetMapping("{id}")
@@ -78,12 +91,22 @@ public class ProductsController
 
     @DeleteMapping("{id}")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    public ResponseEntity<Void> deleteProduct(@PathVariable int id)
+    public ResponseEntity<?> deleteProduct(@PathVariable int id)
     {
-        if (productService.getById(id) == null)
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        try {
 
-        productService.delete(id);
-        return ResponseEntity.noContent().build();
+            if (productService.getById(id) == null) {
+
+                return ResponseEntity.status(404).body("Product with ID: " + id + " not found" );
+            }
+
+            productService.delete(id);
+
+            return ResponseEntity.noContent().build();
+        }
+        catch (ResponseStatusException e) {
+            return ResponseEntity.status(404).body("Product not found for ID: " + id);
+        }
+
     }
 }

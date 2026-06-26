@@ -21,12 +21,14 @@ import java.util.List;
 
 // add annotation to allow cross-site origin requests
 @CrossOrigin(origins = "*")
+
 public class CategoriesController
 {
     private final CategoryService categoryService;
     private final ProductService productService;
 
     // create an Autowired constructor to inject the categoryService and productService
+    @Autowired
     public CategoriesController(CategoryService categoryService, ProductService productService){
 
         this.productService = productService;
@@ -45,11 +47,15 @@ public class CategoriesController
             // find and return all categories
             List<Category> categories = categoryService.getAllCategories();
 
+            if (categories.isEmpty()) {
+                return ResponseEntity.status(404).body("No categories found");
+            }
+
             return ResponseEntity.ok(categories);
 
         } catch (RuntimeException e) {
 
-            return ResponseEntity.status(500).body("Could not find the Category");
+            return ResponseEntity.badRequest().body("There was an error getting the categories");
         }
     }
 
@@ -70,7 +76,7 @@ public class CategoriesController
 
         } catch (RuntimeException e) {
 
-            return ResponseEntity.status(404).body("Could not find the Category");
+            return ResponseEntity.badRequest().body("Could not find the Category");
         }
     }
 
@@ -88,13 +94,14 @@ public class CategoriesController
 
             if (products.isEmpty()) {
 
-                return ResponseEntity.status(404).body("No products found for category ID: " + categoryId);
+                return ResponseEntity.badRequest().body("No products found for category ID: " + categoryId);
             }
+
             return ResponseEntity.ok(products);
         }
         catch (RuntimeException e) {
 
-            return ResponseEntity.status(500).body("Could not find the Products for category ID: " + categoryId );
+            return ResponseEntity.badRequest().body("Could not find the Products for category ID: " + categoryId );
         }
     }
 
@@ -103,18 +110,20 @@ public class CategoriesController
     @PostMapping
 
     // add annotation to ensure that only an ADMIN can call this function
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<?> addCategory(@RequestBody Category category)
     {
 
         try {
+
             // insert the category and return it with status 201 Created
             Category created = categoryService.create(category);
-            return ResponseEntity.status(201).body(created);
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(created);
+
         } catch (RuntimeException e) {
 
             return  ResponseEntity.badRequest().body("Could not create the Category");
-            //return  ResponseEntity.status(403).body("Could not create the Category");
         }
     }
 
@@ -128,6 +137,7 @@ public class CategoriesController
 
             // update the category by id and return the updated category (200 OK)
             categoryService.update(id, category);
+
             return ResponseEntity.ok(category);
         }
         catch (RuntimeException e) {
@@ -147,6 +157,11 @@ public class CategoriesController
     {
         try {
 
+            if(!categoryService.existByID(id)){
+
+                return ResponseEntity.status(404).body("Category with ID: " + id + " not found");
+            }
+
             // delete the category by id and return status 204 No Content
             categoryService.delete(id);
 
@@ -154,7 +169,7 @@ public class CategoriesController
 
         } catch (RuntimeException e) {
 
-            return ResponseEntity.status(404).body("Could not delete the Category");
+            return ResponseEntity.badRequest().body("There was an error deleting the Category");
         }
     }
 }

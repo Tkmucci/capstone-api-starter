@@ -24,7 +24,7 @@ public class CategoryService {
     public Category getByCategoryId(int categoryId) {
 
         // get category by id
-        return categoryRepository.findById(categoryId).orElse(null);
+        return categoryRepository.findById(categoryId).orElseThrow();
     }
 
     public Category create(Category category) {
@@ -45,5 +45,9 @@ public class CategoryService {
     public void delete(int categoryId) {
         // delete category
         categoryRepository.deleteById(categoryId);
+    }
+
+    public boolean existByID(int id) {
+        return categoryRepository.existsById(id);
     }
 }

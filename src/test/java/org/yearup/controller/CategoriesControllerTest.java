@@ -1,10 +1,16 @@
 package org.yearup.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.authorization.AuthorizationDeniedException;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.yearup.controllers.CategoriesController;
 import org.yearup.models.Category;
@@ -13,21 +19,24 @@ import org.yearup.service.ProductService;
 
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.*;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import tools.jackson.databind.ObjectMapper;
 
 @WebMvcTest(CategoriesController.class)
-class CategoriesControllerTest
+@Import(CategoriesControllerTest.SecurityConfig.class)class CategoriesControllerTest
 {
+
+    @TestConfiguration
+    @EnableMethodSecurity
+    static class SecurityConfig { }
+
     @Autowired
     private MockMvc mockMvc;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @MockitoBean
     private CategoryService categoryService;
@@ -77,22 +86,21 @@ class CategoriesControllerTest
     @WithMockUser(roles = "USER")
     void addCategory_asNonAdmin_shouldReturn403() throws Exception
     {
-        Category toCreate = new Category(0, "Books", "Printed books");
-        Category created = new Category(10, "Books", "Printed books");
-        when(categoryService.create(any(Category.class))).thenReturn(created);
+        when(categoryService.create(any(Category.class)))
+                .thenReturn(new Category(10, "Books", "Printed books"));
 
-        mockMvc.perform(post("/categories")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(toCreate)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.categoryId").value(10));
+        try {
+            mockMvc.perform(post("/categories")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(new Category(99, "Books", "Printed books"))))
+                    .andReturn();
+            fail("Expected ServletException to be thrown");
+        } catch (jakarta.servlet.ServletException ex) {
+            assertTrue(ex.getCause() instanceof AuthorizationDeniedException,
+                    "Expected AuthorizationDeniedException but got: " + ex.getCause());
+        }
 
-//        mockMvc.perform(post("/categories")
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .content(objectMapper.writeValueAsString(new Category(0, "Books", "Printed books"))))
-//                .andExpect(status().isForbidden());
-//
-//        verify(categoryService, never()).create(any());
+        verify(categoryService, never()).create(any());
     }
 
     @Test
@@ -113,6 +121,7 @@ class CategoriesControllerTest
     @WithMockUser(roles = "ADMIN")
     void deleteCategory_asAdmin_shouldReturn204() throws Exception
     {
+        when(categoryService.existByID(1)).thenReturn(true);
         doNothing().when(categoryService).delete(1);
 
         mockMvc.perform(delete("/categories/1"))
